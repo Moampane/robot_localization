@@ -230,6 +230,8 @@ class ParticleFilter(Node):
             theta: the angle relative to the robot frame for each corresponding reading 
         """
         # TODO: implement this
+        
+        # new_particle_position = [transformation from old odom to new odom]*[r,theta]
         pass
 
     def update_initial_pose(self, msg):
@@ -246,7 +248,18 @@ class ParticleFilter(Node):
         if xy_theta is None:
             xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose)
         self.particle_cloud = []
-        # TODO create particles
+
+        # Use 2D gaussian to initialize particles 
+        # TODO filter particles that end up outside the map
+        xc,yc = xy_theta[0],xy_theta[1]
+        mu = [xc,yc]
+        sigma = [[0.1,0],[0,0.1]]
+        x_coords,y_coords = np.random.multivariate_normal(mu, sigma, self.n_particles).T
+        for i in range(self.n_particles):
+            x = x_coords[i]
+            y = y_coords[i]
+            theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
+            self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
 
         self.normalize_particles()
         self.update_robot_pose()
