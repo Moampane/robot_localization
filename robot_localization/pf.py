@@ -262,12 +262,18 @@ class ParticleFilter(Node):
             self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
 
         self.normalize_particles()
+        # print(self.particle_cloud)
         self.update_robot_pose()
 
     def normalize_particles(self):
         """ Make sure the particle weights define a valid distribution (i.e. sum to 1.0) """
-        # TODO: implement this
-        pass
+
+        # Normalize particle weights so they sum to 1
+        weight_sum = np.sum(np.array([particle.w for particle in self.particle_cloud]))
+        for particle in self.particle_cloud:
+            particle.w /= weight_sum
+
+        
 
     def publish_particles(self, timestamp):
         msg = ParticleCloud()
