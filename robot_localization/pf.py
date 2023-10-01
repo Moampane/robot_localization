@@ -168,6 +168,7 @@ class ParticleFilter(Node):
             self.resample_particles()               # resample particles to focus on areas of high density
         # publish particles (so things like rviz can see them)
         self.publish_particles(msg.header.stamp)
+        print(len(self.particle_cloud))
 
     def moved_far_enough_to_update(self, new_odom_xy_theta):
         return math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.d_thresh or \
@@ -183,6 +184,10 @@ class ParticleFilter(Node):
         """
         # first make sure that the particle weights are normalized
         self.normalize_particles()
+
+        # Find the most likely location of robot based on particle weights
+
+
 
         # TODO: assign the latest pose into self.robot_pose as a geometry_msgs.Pose object
         # just to get started we will fix the robot's pose to always be at the origin
@@ -212,7 +217,25 @@ class ParticleFilter(Node):
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
+        xdiff = delta[0]
+        ydiff = delta[1]
+        theta = delta[2]
+        trans_mat = np.array([[np.cos(theta),-1*np.sin(theta),xdiff],
+                              [np.sin(theta),np.cos(theta),ydiff],
+                              [0,0,1]])
+
         # TODO: modify particles using delta
+        for particle in self.particle_cloud:
+            coord = np.array([[particle.x],
+                              [particle.y],
+                              [particle.theta]])
+            
+            new_coord = np.matmul(trans_mat,coord)
+            particle.x = new_coord[0][0]
+            particle.y = new_coord[1][0]
+            particle.theta = new_coord[2][0]
+            
+        
 
     def resample_particles(self):
         """ Resample the particles according to the new particle weights.
@@ -231,7 +254,7 @@ class ParticleFilter(Node):
         """
         # TODO: implement this
         
-        # new_particle_position = [transformation from old odom to new odom]*[r,theta]
+        
         pass
 
     def update_initial_pose(self, msg):
@@ -272,8 +295,6 @@ class ParticleFilter(Node):
         weight_sum = np.sum(np.array([particle.w for particle in self.particle_cloud]))
         for particle in self.particle_cloud:
             particle.w /= weight_sum
-
-        
 
     def publish_particles(self, timestamp):
         msg = ParticleCloud()
