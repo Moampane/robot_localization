@@ -1,1 +1,1 @@
-# Computational Intro to Robotics: Robot Localization Project
+# Computational Intro to Robotics: Robot Localization
