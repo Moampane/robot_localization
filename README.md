@@ -1,1 +1,1 @@
-Where is my robot? A robot localization project
+# Computational Intro to Robotics: Robot Localization Project
