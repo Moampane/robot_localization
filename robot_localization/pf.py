@@ -16,7 +16,7 @@ import math
 import time
 import numpy as np
 from occupancy_field import OccupancyField
-from helper_functions import TFHelper
+from helper_functions import TFHelper, draw_random_sample
 from rclpy.qos import qos_profile_sensor_data
 from angle_helpers import quaternion_from_euler
 
@@ -192,14 +192,22 @@ class ParticleFilter(Node):
         """
         # first make sure that the particle weights are normalized
         self.normalize_particles()
+        # Isolate particles that are above a certain weight threshold
+        filtered = []
+        for particle in self.particle_cloud:
+            if particle.w > 0.01:
+                filtered.append(particle)
+            
+        new_x = np.mean(np.array([particle.x for particle in filtered]))
+        new_y = np.mean(np.array([particle.y for particle in filtered]))
+        new_t = np.mean(np.array([particle.theta for particle in filtered]))
 
-        # Find the most likely location of robot based on particle weights
-
-
-
-        # TODO: assign the latest pose into self.robot_pose as a geometry_msgs.Pose object
-        # just to get started we will fix the robot's pose to always be at the origin
-        self.robot_pose = Pose()
+        if not np.isnan(new_x) and not np.isnan(new_y) and not np.isnan(new_t):
+            q = quaternion_from_euler(0,0,new_t)
+            self.robot_pose = Pose(position = Point(x=new_x,y=new_y,z=0.0),
+                                orientation=Quaternion(x=q[0],y=q[1],z=q[2],w=q[3]))
+        else:
+            self.robot_pose = Pose()
         if hasattr(self, 'odom_pose'):
             self.transform_helper.fix_map_to_odom_transform(self.robot_pose,
                                                             self.odom_pose)
