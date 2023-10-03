@@ -170,13 +170,8 @@ class ParticleFilter(Node):
             self.resample_particles()               # resample particles to focus on areas of high density
         # publish particles (so things like rviz can see them)
         self.publish_particles(msg.header.stamp)
-        # print(len(self.particle_cloud))
 
-        # for particle in self.particle_cloud:
-        #     particle_dist = self.occupancy_field.get_closest_obstacle_distance(particle.x, particle.y)
-        #     particle.w = 1/abs(self.min_dist-particle_dist)
-        #     print(particle.w)
-        # print("r: {0}, theta: {1}".format(r, theta))
+
 
     def moved_far_enough_to_update(self, new_odom_xy_theta):
         return math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.d_thresh or \
@@ -259,9 +254,28 @@ class ParticleFilter(Node):
             particle is selected in the resampling step.  You may want to make use of the given helper
             function draw_random_sample in helper_functions.py.
         """
+        keep = 25
         # make sure the distribution is normalized
         self.normalize_particles()
         # TODO: fill out the rest of the implementation
+        kept_particles = draw_random_sample(self.particle_cloud,[particle.w for particle in self.particle_cloud],keep)
+
+        self.particle_cloud = []
+        # For each particle in the kept ones, randomly distribute equal number of particles close to them
+        num_per_particle = (self.n_particles-keep)//keep 
+        for particle in kept_particles:
+            particle.w = 1.0
+            xc,yc = particle.x,particle.y
+            mu = [xc,yc]
+            sigma = [[0.1,0],[0,0.1]]
+            x_coords,y_coords = np.random.multivariate_normal(mu, sigma, num_per_particle).T
+            for i in range(num_per_particle):
+                x = x_coords[i]
+                y = y_coords[i]
+                theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
+                self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
+        
+        self.particle_cloud += kept_particles
 
     def update_particles_with_laser(self, r, theta):
         """ Updates the particle weights in response to the scan data
@@ -281,7 +295,6 @@ class ParticleFilter(Node):
                     weight_temp += 1
 
             particle.w = weight_temp
-            print(particle.w)
        
 
     def update_initial_pose(self, msg):
