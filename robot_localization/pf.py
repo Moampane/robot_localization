@@ -91,6 +91,7 @@ class ParticleFilter(Node):
 
         # laser_subscriber listens for data from the lidar
         self.create_subscription(LaserScan, self.scan_topic, self.scan_received, 10)
+        self.min_dist = 0 
 
         # this is used to keep track of the timestamps coming from bag files
         # knowing this information helps us set the timestamp of our map -> odom
@@ -147,13 +148,13 @@ class ParticleFilter(Node):
             return
         
         (r, theta) = self.transform_helper.convert_scan_to_polar_in_robot_frame(msg, self.base_frame)
-        print("r[0]={0}, theta[0]={1}".format(r[0], theta[0]))
+        # print("r[0]={0}, theta[0]={1}".format(r[0], theta[0]))
         # clear the current scan so that we can process the next one
         self.scan_to_process = None
 
         self.odom_pose = new_pose
         new_odom_xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose)
-        print("x: {0}, y: {1}, yaw: {2}".format(*new_odom_xy_theta))
+        # print("x: {0}, y: {1}, yaw: {2}".format(*new_odom_xy_theta))
 
         if not self.current_odom_xy_theta:
             self.current_odom_xy_theta = new_odom_xy_theta
@@ -168,7 +169,13 @@ class ParticleFilter(Node):
             self.resample_particles()               # resample particles to focus on areas of high density
         # publish particles (so things like rviz can see them)
         self.publish_particles(msg.header.stamp)
-        print(len(self.particle_cloud))
+        # print(len(self.particle_cloud))
+
+        # for particle in self.particle_cloud:
+        #     particle_dist = self.occupancy_field.get_closest_obstacle_distance(particle.x, particle.y)
+        #     particle.w = 1/abs(self.min_dist-particle_dist)
+        #     print(particle.w)
+        print("r: {0}, theta: {1}".format(r, theta))
 
     def moved_far_enough_to_update(self, new_odom_xy_theta):
         return math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.d_thresh or \
@@ -304,12 +311,14 @@ class ParticleFilter(Node):
             msg.particles.append(Nav2Particle(pose=p.as_pose(), weight=p.w))
         self.particle_pub.publish(msg)
 
-    def scan_received(self, msg):
+    def scan_received(self, msg: LaserScan):
         self.last_scan_timestamp = msg.header.stamp
         # we throw away scans until we are done processing the previous scan
         # self.scan_to_process is set to None in the run_loop 
         if self.scan_to_process is None:
             self.scan_to_process = msg
+        
+        self.min_dist = msg.range_min
 
 def main(args=None):
     rclpy.init()
