@@ -82,6 +82,7 @@ class ParticleFilter(Node):
         self.a_thresh = math.pi/6       # the amount of angular movement before performing an update
 
         # TODO: define additional constants if needed
+        self.w_thresh = 0.05
 
         # pose_listener responds to selection of a new approximate robot location (for instance using rviz)
         self.create_subscription(PoseWithCovarianceStamped, 'initialpose', self.update_initial_pose, 10)
@@ -175,7 +176,7 @@ class ParticleFilter(Node):
         #     particle_dist = self.occupancy_field.get_closest_obstacle_distance(particle.x, particle.y)
         #     particle.w = 1/abs(self.min_dist-particle_dist)
         #     print(particle.w)
-        print("r: {0}, theta: {1}".format(r, theta))
+        # print("r: {0}, theta: {1}".format(r, theta))
 
     def moved_far_enough_to_update(self, new_odom_xy_theta):
         return math.fabs(new_odom_xy_theta[0] - self.current_odom_xy_theta[0]) > self.d_thresh or \
@@ -260,9 +261,20 @@ class ParticleFilter(Node):
             theta: the angle relative to the robot frame for each corresponding reading 
         """
         # TODO: implement this
-        
-        
-        pass
+
+        for particle in self.particle_cloud:
+            weight_temp = 0
+
+            for i in range(len(r)):
+                phi = particle.theta
+                proj_laserscan_x = particle.x+r[i]*np.cos(phi + theta[i])
+                proj_laserscan_y = particle.y+r[i]*np.sin(phi + theta[i])
+                if self.w_thresh > self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y):
+                    weight_temp += 1
+
+            particle.w = weight_temp
+            print(particle.w)
+       
 
     def update_initial_pose(self, msg):
         """ Callback function to handle re-initializing the particle filter based on a pose estimate.
