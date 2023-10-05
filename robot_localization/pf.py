@@ -19,6 +19,7 @@ from occupancy_field import OccupancyField
 from helper_functions import TFHelper, draw_random_sample
 from rclpy.qos import qos_profile_sensor_data
 from angle_helpers import quaternion_from_euler
+import statistics as st
 
 class Particle(object):
     """ Represents a hypothesis (particle) of the robot's pose consisting of x,y and theta (yaw)
@@ -193,11 +194,15 @@ class ParticleFilter(Node):
             if particle.w > 0.01:
                 filtered.append(particle)
             
-        new_x = np.mean(np.array([particle.x for particle in filtered]))
-        new_y = np.mean(np.array([particle.y for particle in filtered]))
-        new_t = np.mean(np.array([particle.theta for particle in filtered]))
+        # new_x = np.mean(np.array([particle.x for particle in filtered]))
+        # new_y = np.mean(np.array([particle.y for particle in filtered]))
+        # new_t = np.mean(np.array([particle.theta for particle in filtered]))
 
-        if not np.isnan(new_x) and not np.isnan(new_y) and not np.isnan(new_t):
+        if filtered:
+            new_x = st.mode([round(particle.x,2) for particle in filtered])
+            new_y = st.mode([round(particle.y,2) for particle in filtered])
+            new_t = st.mode([round(particle.theta,2) for particle in filtered])
+            print(new_x,new_y)
             q = quaternion_from_euler(0,0,new_t)
             self.robot_pose = Pose(position = Point(x=new_x,y=new_y,z=0.0),
                                 orientation=Quaternion(x=q[0],y=q[1],z=q[2],w=q[3]))
@@ -254,10 +259,10 @@ class ParticleFilter(Node):
             particle is selected in the resampling step.  You may want to make use of the given helper
             function draw_random_sample in helper_functions.py.
         """
-        keep = 25
+        keep = 10
         # make sure the distribution is normalized
         self.normalize_particles()
-        # TODO: fill out the rest of the implementation
+
         kept_particles = draw_random_sample(self.particle_cloud,[particle.w for particle in self.particle_cloud],keep)
 
         self.particle_cloud = []
@@ -267,7 +272,7 @@ class ParticleFilter(Node):
             particle.w = 1.0
             xc,yc = particle.x,particle.y
             mu = [xc,yc]
-            sigma = [[0.1,0],[0,0.1]]
+            sigma = [[0.05,0],[0,0.05]]
             x_coords,y_coords = np.random.multivariate_normal(mu, sigma, num_per_particle).T
             for i in range(num_per_particle):
                 x = x_coords[i]
@@ -313,7 +318,6 @@ class ParticleFilter(Node):
         self.particle_cloud = []
 
         # Use 2D gaussian to initialize particles 
-        # TODO filter particles that end up outside the map
         xc,yc = xy_theta[0],xy_theta[1]
         mu = [xc,yc]
         sigma = [[0.1,0],[0,0.1]]
