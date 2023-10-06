@@ -77,10 +77,13 @@ class ParticleFilter(Node):
         self.odom_frame = "odom"        # the name of the odometry coordinate frame
         self.scan_topic = "scan"        # the topic where we will get laser scans from 
 
-        self.n_particles = 300          # the number of particles to use
+        # self.n_particles = 300          # the number of particles to use
+        self.n_particles = 5          # the number of particles to use
 
-        self.d_thresh = 0.2             # the amount of linear movement before performing an update
-        self.a_thresh = math.pi/6       # the amount of angular movement before performing an update
+        # self.d_thresh = 0.2             # the amount of linear movement before performing an update
+        # self.a_thresh = math.pi/6       # the amount of angular movement before performing an update
+        self.d_thresh = 0.05
+        self.a_thresh = 0.01
 
         # TODO: define additional constants if needed
         self.w_thresh = 0.05
@@ -166,9 +169,9 @@ class ParticleFilter(Node):
         elif self.moved_far_enough_to_update(new_odom_xy_theta):
             # we have moved far enough to do an update!
             self.update_particles_with_odom()    # update based on odometry
-            self.update_particles_with_laser(r, theta)   # update based on laser scan
-            self.update_robot_pose()                # update robot's pose based on particles
-            self.resample_particles()               # resample particles to focus on areas of high density
+            # self.update_particles_with_laser(r, theta)   # update based on laser scan
+            # self.update_robot_pose()                # update robot's pose based on particles
+            # self.resample_particles()               # resample particles to focus on areas of high density
         # publish particles (so things like rviz can see them)
         self.publish_particles(msg.header.stamp)
 
@@ -226,32 +229,38 @@ class ParticleFilter(Node):
         # compute the change in x,y,theta since our last update
         if self.current_odom_xy_theta:
             old_odom_xy_theta = self.current_odom_xy_theta
-            delta = (new_odom_xy_theta[0] - self.current_odom_xy_theta[0],
-                     new_odom_xy_theta[1] - self.current_odom_xy_theta[1],
-                     new_odom_xy_theta[2] - self.current_odom_xy_theta[2])
 
             self.current_odom_xy_theta = new_odom_xy_theta
         else:
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
-        xdiff = delta[0]
-        ydiff = delta[1]
-        theta = delta[2]
-        trans_mat = np.array([[np.cos(theta),-1*np.sin(theta),xdiff],
-                              [np.sin(theta),np.cos(theta),ydiff],
+        old_odom_trans = np.array([[np.cos(old_odom_xy_theta[2]),-1*np.sin(old_odom_xy_theta[2]),old_odom_xy_theta[0]],
+                              [np.sin(old_odom_xy_theta[2]),np.cos(old_odom_xy_theta[2]),old_odom_xy_theta[1]],
                               [0,0,1]])
+        new_odom_trans = np.array([[np.cos(new_odom_xy_theta[2]),-1*np.sin(new_odom_xy_theta[2]),new_odom_xy_theta[0]],
+                              [np.sin(new_odom_xy_theta[2]),np.cos(new_odom_xy_theta[2]),new_odom_xy_theta[1]],
+                              [0,0,1]])
+        trans_mat = np.linalg.inv(old_odom_trans) @ new_odom_trans
 
         # TODO: modify particles using delta
         for particle in self.particle_cloud:
-            coord = np.array([[particle.x],
-                              [particle.y],
-                              [particle.theta]])
+            particle_trans = np.array([[np.cos(particle.theta),-1*np.sin(particle.theta),particle.x],
+                              [np.sin(particle.theta),np.cos(particle.theta),particle.y],
+                              [0,0,1]])
+            updated_particle_trans = particle_trans @ trans_mat @ np.linalg.inv(particle_trans)
+
+            coord = np.array([particle.x,
+                              particle.y,
+                              1.0])
             
-            new_coord = np.matmul(trans_mat,coord)
-            particle.x = new_coord[0][0]
-            particle.y = new_coord[1][0]
-            particle.theta = new_coord[2][0]
+            new_coord = updated_particle_trans @ coord
+            particle.x = new_coord[0]
+            particle.y = new_coord[1]
+            particle.theta += math.atan2(trans_mat[1][0], trans_mat[0][0])
+            print(f"x: {particle.x}")
+            print(f"y: {particle.y}")
+            print(f"theta: {particle.theta}")
             
         
 
@@ -325,9 +334,9 @@ class ParticleFilter(Node):
         sigma = [[0.1,0],[0,0.1]]
         x_coords,y_coords = np.random.multivariate_normal(mu, sigma, self.n_particles).T
         for i in range(self.n_particles):
-            x = x_coords[i]
-            y = y_coords[i]
-            theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
+            x = mu[0] + i/10
+            y = mu[1] + i/10
+            theta = i*5
             self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
 
         self.normalize_particles()
