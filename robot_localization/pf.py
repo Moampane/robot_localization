@@ -188,17 +188,19 @@ class ParticleFilter(Node):
         """
         # first make sure that the particle weights are normalized
         self.normalize_particles()
-        # Isolate particles that are above a certain weight threshold
+        # Isolate particles that are above a certain weight threshold (0.01 at the moment)
         filtered = []
         for particle in self.particle_cloud:
             if particle.w > 0.01:
                 filtered.append(particle)
-            
-        # new_x = np.mean(np.array([particle.x for particle in filtered]))
-        # new_y = np.mean(np.array([particle.y for particle in filtered]))
-        # new_t = np.mean(np.array([particle.theta for particle in filtered]))
-
+        
         if filtered:
+            # Using MEAN
+            # new_x = np.mean(np.array([particle.x for particle in filtered]))
+            # new_y = np.mean(np.array([particle.y for particle in filtered]))
+            # new_t = np.mean(np.array([particle.theta for particle in filtered]))
+
+            # Using MODE
             new_x = st.mode([round(particle.x,2) for particle in filtered])
             new_y = st.mode([round(particle.y,2) for particle in filtered])
             new_t = st.mode([round(particle.theta,2) for particle in filtered])
