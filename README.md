@@ -13,10 +13,12 @@ This project can be separated into 5 main steps
 5. Resampling the particles
 
 #### Initializing the particle cloud (`initialize_particle_cloud()`)
-Before running the particle filter, an initial set of particles must be created. In this project, a 2D gaussian distrubution with $\mu = (0,0)$ and $\sigma = (0.05, 0.05)$. A plot of the distribution is shown below.  
+Before running the particle filter, an initial set of particles must be created. In this project, a 2D gaussian distrubution with $\mu = (0,0)$ and $\sigma = (0.05, 0.05)$ is used to initialize a particle cloud of 300 particles. The plot of the distribution is shown below.  
 
 ![Particle cloud plot](img/particle_cloud.png)  
 Fig 1. Visualization of the probability distribution used for initializing the particle cloud
+
+(x,y) coordinates of 300 initial particles are selected using this probability distribution. The particles' angles are randomly selected from a range of $0$ to $2\pi$ radians.
 
 #### Update particles with robot's odomoetry (`update_particles_with_odom()`)
 LOREM IPSUM
@@ -26,7 +28,6 @@ LOREM IPSUM
 
 #### Update robot position with particles' weights (`update_robot_pose()`)
 LOREM IPSUM
-
 
 #### Resample particles (`resample_particles()`)
 LOREM IPSUM
