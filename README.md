@@ -18,7 +18,7 @@ Before running the particle filter, an initial set of particles must be created.
 ![Particle cloud plot](img/particle_cloud.png)  
 Fig 1. Visualization of the probability distribution used for initializing the particle cloud
 
-(x,y) coordinates of 300 initial particles are selected using this probability distribution. The particles' angles are randomly selected from a range of $0$ to $2\pi$ radians.
+$(x,y)$ coordinates of 300 initial particles are selected using this probability distribution. The particles' angles are randomly selected from a range of $0$ to $2\pi$ radians.
 
 #### Update particles with robot's odomoetry (`update_particles_with_odom()`)
 LOREM IPSUM
@@ -27,7 +27,9 @@ LOREM IPSUM
 LOREM IPSUM
 
 #### Update robot position with particles' weights (`update_robot_pose()`)
-LOREM IPSUM
+Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location.  
+
+A particle is considered *high-weight* if its weight is greater than 0.01. Then, the $(x,y)$ coordinated are rounded to 2 decimal places for the purpose of calculating the mode. 
 
 #### Resample particles (`resample_particles()`)
 LOREM IPSUM
