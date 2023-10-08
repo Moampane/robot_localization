@@ -27,12 +27,15 @@ LOREM IPSUM
 LOREM IPSUM
 
 #### Update robot position with particles' weights (`update_robot_pose()`)
-Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location.  
+Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location. The image below shows the updating process.
 
-A particle is considered *high-weight* if its weight is greater than 0.01. Then, the $(x,y)$ coordinated are rounded to 2 decimal places for the purpose of calculating the mode. 
+![Robot pose update](img/robot_pose_update.png)
+Fig 2. Visualization of mode-based robot pose updating
+
+A particle is considered *high-weight* if its weight is greater than 0.01. Then, the particles' $(x,y,\theta)$ coordinates are rounded up to 2 decimal places for the purpose of calculating the mode. 
 
 #### Resample particles (`resample_particles()`)
-LOREM IPSUM
+Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. 
 
 
 ## Challenges we faced
