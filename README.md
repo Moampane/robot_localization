@@ -32,7 +32,13 @@ Using matrix multiplication, odometry movements were applied to each particle. T
 Fig 3. Figure of matrix multiplication process used to make odometry movement transformation matrix
 
 #### Update particles with robot's laser scan (`update_particles_with_laser()`)
-LOREM IPSUM
+Testing each particle's location for similarity to the robot's location requires projecting the robot's laser scan data to each particle. To project the laser scan data onto each particle, each laser scan vector is added to each particle.
+
+ADD IMAGE OF LASER SCAN VECTOR BEING ADDED TO A PARTICLE
+
+After laser scan data is projected onto a particle, using the helper function 'get_closest_obstacle_distance()' and passing in the x and y of a projected laser scan point as parameters, if a projected point is within 5cm of an obstacle, the particle the projection is coming off increases in weight. This is done for every projected laser scan point of every particle.
+
+ADD IMAGE OF 2 PARTICLE PROJECTION EXAMPLE
 
 #### Update robot position with particles' weights (`update_robot_pose()`)
 Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location. The image below shows the updating process.
