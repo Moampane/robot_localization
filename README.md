@@ -27,7 +27,8 @@ GIF OF PARTICLES BEING UPDATES BY ROBOT ODOMETRY
 
 Using matrix multiplication, odometry movements were applied to each particle. The process consisted of bringing the particle to the origin of the odometry frame, applying the odometry transformation matrix, and undoing the transformation of returning the particle to the origin. If t is a time step, multiplying the inverse of the transformation matrix of the robot's pose $(x,y,\theta)$ at t<sub>x-1</sub> and the transformation matrix of the robot's pose at t<sub>x</sub> gives the odometry transformation matrix.
 
-FIGURE OF MATRIX MULTIPLICATION
+![Transformation matrix to apply odometry movement](img/mat_mul.png)
+Fig 2. Figure of matrix multiplication process used to make odometry movement transformation matrix
 
 #### Update particles with robot's laser scan (`update_particles_with_laser()`)
 LOREM IPSUM
@@ -36,7 +37,7 @@ LOREM IPSUM
 Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location. The image below shows the updating process.
 
 ![Robot pose update](img/robot_pose_update.png)
-Fig 2. Visualization of mode-based robot pose updating
+Fig 3. Visualization of mode-based robot pose updating
 
 A particle is considered *high-weight* if its weight is greater than 0.01. Then, the particles' $(x,y,\theta)$ coordinates are rounded up to 2 decimal places for the purpose of calculating the mode. 
 
@@ -44,7 +45,7 @@ A particle is considered *high-weight* if its weight is greater than 0.01. Then,
 Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\sigma = (0.05,0.05)$ and $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. This keeps the highest weight particle in the cloud but replacess every other particle with a new set of 299 particles. The resampling process is shown in the figure below.
 
 ![Particle resampling](img/resampling.png)
-Fig 3. Visualization of the resampling process
+Fig 4. Visualization of the resampling process
 
 
 
