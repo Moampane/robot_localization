@@ -13,7 +13,7 @@ This project can be separated into 5 main steps
 5. Resampling the particles
 
 #### Initializing the particle cloud (`initialize_particle_cloud()`)
-Before running the particle filter, an initial set of particles must be created. In this project, a 2D gaussian distrubution with $\mu = (0,0)$ and $\sigma = (0.05, 0.05)$ is used to initialize a particle cloud of 300 particles. The plot of the distribution is shown below.  
+Before running the particle filter, an initial set of particles must be created. In this project, a 2D gaussian distrubution with $\mu = (0,0)$ and $\sigma = (0.1, 0.1)$ is used to initialize a particle cloud of 300 particles. The plot of the distribution is shown below.  
 
 ![Particle cloud plot](img/particle_cloud.png)  
 Fig 1. Visualization of the probability distribution used for initializing the particle cloud
@@ -35,7 +35,7 @@ Fig 2. Visualization of mode-based robot pose updating
 A particle is considered *high-weight* if its weight is greater than 0.01. Then, the particles' $(x,y,\theta)$ coordinates are rounded up to 2 decimal places for the purpose of calculating the mode. 
 
 #### Resample particles (`resample_particles()`)
-Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. This keeps the highest weight particle in the cloud but replacess every other particle with a new set of 299 particles. The resampling process is shown in the figure below.
+Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\sigma = (0.05,0.05)$ and $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. This keeps the highest weight particle in the cloud but replacess every other particle with a new set of 299 particles. The resampling process is shown in the figure below.
 
 ![Particle resampling](img/resampling.png)
 Fig 3. Visualization of the resampling process
