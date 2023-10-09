@@ -27,7 +27,7 @@ GIF OF PARTICLES BEING UPDATES BY ROBOT ODOMETRY
 
 Using matrix multiplication, odometry movements were applied to each particle. The process consisted of bringing the particle to the origin of the odometry frame, applying the odometry transformation matrix, and undoing the transformation of returning the particle to the origin. If t is a time step, multiplying the inverse of the transformation matrix of the robot's pose $(x,y,\theta)$ at t<sub>x-1</sub> and the transformation matrix of the robot's pose at t<sub>x</sub> gives the odometry transformation matrix.
 
-![Transformation matrix to apply odometry movement](img/mat_mul.png)
+![Transformation matrix to apply odometry movement](img/mat_mul_fig.png)
 Fig 2. Figure of matrix multiplication process used to make odometry movement transformation matrix
 
 #### Update particles with robot's laser scan (`update_particles_with_laser()`)
