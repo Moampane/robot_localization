@@ -77,16 +77,11 @@ class ParticleFilter(Node):
         self.odom_frame = "odom"        # the name of the odometry coordinate frame
         self.scan_topic = "scan"        # the topic where we will get laser scans from 
 
-        self.n_particles = 300          # the number of particles to use
+        self.n_particles = 500          # the number of particles to use
 
 
         self.d_thresh = 0.2             # the amount of linear movement before performing an update
         self.a_thresh = math.pi/12       # the amount of angular movement before performing an update
-        # self.d_thresh = 0.05
-        # self.a_thresh = 0.01
-
-        # TODO: define additional constants if needed
-        self.w_thresh = 0.05
 
         # pose_listener responds to selection of a new approximate robot location (for instance using rviz)
         self.create_subscription(PoseWithCovarianceStamped, 'initialpose', self.update_initial_pose, 10)
@@ -193,9 +188,11 @@ class ParticleFilter(Node):
         self.normalize_particles()
         # Isolate particles that are above a certain weight threshold (0.01 at the moment)
         filtered = []
+        weight_thresh = 0.005
         for particle in self.particle_cloud:
-            if particle.w > 0.01:
+            if particle.w > weight_thresh:
                 filtered.append(particle)
+        print(len(filtered))
         
         if filtered:
             # Using MEAN
@@ -207,12 +204,12 @@ class ParticleFilter(Node):
             new_x = st.mode([round(particle.x,2) for particle in filtered])
             new_y = st.mode([round(particle.y,2) for particle in filtered])
             new_t = st.mode([round(particle.theta,2) for particle in filtered])
-            print(new_x,new_y)
             q = quaternion_from_euler(0,0,new_t)
             self.robot_pose = Pose(position = Point(x=new_x,y=new_y,z=0.0),
                                 orientation=Quaternion(x=q[0],y=q[1],z=q[2],w=q[3]))
         else:
             self.robot_pose = Pose()
+            print(f"{filtered}, go to jail")
         if hasattr(self, 'odom_pose'):
             self.transform_helper.fix_map_to_odom_transform(self.robot_pose,
                                                             self.odom_pose)
@@ -243,7 +240,6 @@ class ParticleFilter(Node):
                               [0,0,1]])
         trans_mat = np.linalg.inv(old_odom_trans) @ new_odom_trans
 
-        # TODO: modify particles using delta
         for particle in self.particle_cloud:
             particle_trans = np.array([[np.cos(particle.theta),-1*np.sin(particle.theta),particle.x],
                               [np.sin(particle.theta),np.cos(particle.theta),particle.y],
@@ -258,11 +254,7 @@ class ParticleFilter(Node):
             particle.x = new_coord[0]
             particle.y = new_coord[1]
             particle.theta += math.atan2(trans_mat[1][0], trans_mat[0][0])
-            print(f"x: {particle.x}")
-            print(f"y: {particle.y}")
-            print(f"theta: {particle.theta}")
-            
-        
+                 
 
     def resample_particles(self):
         """ Resample the particles according to the new particle weights.
@@ -296,9 +288,9 @@ class ParticleFilter(Node):
         # self.particle_cloud += kept_particles
 
         # PICK ONE PARTICLE WITH HIGHEST WEIGHT AND RESAMPLE AROUND IT
-
         # Find particle with highest weight
         particle_max = None
+        
         for particle_crnt in self.particle_cloud:
             if not particle_max:
                 particle_max = particle_crnt
@@ -311,12 +303,17 @@ class ParticleFilter(Node):
         sigma = [[0.05,0],[0,0.05]]
         x_coords,y_coords = np.random.multivariate_normal(mu, sigma, self.n_particles-1).T
 
+        # Add exponential noise to angle
+        angle_noise = np.random.exponential(40,self.n_particles-1)
+        angle_with_noise = [np.deg2rad(particle_max.theta + noise) for noise in angle_noise]
+
         # Reset particle cloud
         self.particle_cloud = []
         for i in range(self.n_particles-1):
             x = x_coords[i]
             y = y_coords[i]
-            theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
+            # theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
+            theta = angle_with_noise[i]
             self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
 
 
@@ -325,8 +322,8 @@ class ParticleFilter(Node):
             r: the distance readings to obstacles
             theta: the angle relative to the robot frame for each corresponding reading 
         """
-        # TODO: implement this
-
+        # If within +/- 5cm, the particle gains 1 weight point
+        laser_dist_thresh = 0.05
         for particle in self.particle_cloud:
             weight_temp = 0
 
@@ -334,7 +331,7 @@ class ParticleFilter(Node):
                 phi = particle.theta
                 proj_laserscan_x = particle.x+r[i]*np.cos(phi + theta[i])
                 proj_laserscan_y = particle.y+r[i]*np.sin(phi + theta[i])
-                if self.w_thresh > self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y):
+                if laser_dist_thresh > self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y):
                     weight_temp += 1
 
             particle.w = weight_temp
