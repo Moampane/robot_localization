@@ -34,17 +34,17 @@ Fig 3. Figure of matrix multiplication process used to make odometry movement tr
 #### Update particles with robot's laser scan (`update_particles_with_laser()`)
 Testing each particle's location for similarity to the robot's location requires projecting the robot's laser scan data to each particle. To project the laser scan data onto each particle, each laser scan vector is added to each particle.
 
-<img src="img/project_laser_scan.png" 
-        alt="One laser scan point being projected on a particle" 
-        style="display: block; margin: 0 auto" />
+<div style="text-align:center">
+<img src="img/project_laser_scan.png" alt="One laser scan point being projected on a particle" />
+</div>
 
 Fig 4. Figure of one laser scan point being projected onto one particle
 
 After laser scan data is projected onto a particle, using the helper function 'get_closest_obstacle_distance()' and passing in the x and y of a projected laser scan point as parameters, if a projected point is within 5cm of an obstacle, the particle the projection is coming off increases in weight. This is done for every projected laser scan point of every particle.
 
-<img src="img/projections.png" 
-        alt="Robot laser scan and two laser scan projections" 
-        style="display: block; margin: 0 auto" />
+<div style="text-align:center">
+<img src="img/projections.png" alt="Robot laser scan and two laser scan projections" />
+</div>
 
 Fig 5. Visualization of robot's laser scan and two laser scan projections. Red and blue dots are projected laser scan points from the corresponding red and blue arrows representing particles. The red particle has a higher weight because more of its projected laser scan points are within 5cm of an obstacle while none of the blue particle's projected laser scan points are within 5cm of an obstacle.
 
