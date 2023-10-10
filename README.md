@@ -66,12 +66,11 @@ Fig 7. Visualization of the resampling process
 
 
 ## Challenges we faced
-The biggest challenge we faced during this project was trying to fine-tune all the different parameters used for the particle filter. The number of particles, particle weights, threshold values for determining if a particle should be considered *high-weight*, etc. Since altering any one of these values drastically affect the outcome, we spent a lot of time tuning these paramters to get the best outcome. In fact, almost half of the given time for this project was used for parameter tuning.  
+The biggest challenge we faced during this project was trying to fine-tune all the different parameters used for the particle filter. The number of particles, particle weights, threshold values for determining if a particle should be considered *high-weight*, etc. Since altering any one of these values drastically affect the outcome, we spent a lot of time tuning these paramters to get the best outcome. In fact, almost half of the given time for this project was used for parameter tuning.
 
-Another challenge we faced was understanding all the helper functions that were given to us. Since a lot of the helper functions used libraries that were unfamiliar to us, it was difficult to know what each line was doing at first glance. We learned the importance of reading docstrings as well as comments.
-
+Another challenge was getting a solid foundation of the concepts behind particle filters before diving into the project. Since this topic was new to both of us, we spent a lot of time researching the topic before going into the project. There were confusing linear algebra concepts like reference frames and transformtaion matrices that made the project far more challenging than we expected. 
 
 ## Project Reflection
-LOREM IPSUM
+We learned the importance of reading docstrings as well as comments.
 
 
