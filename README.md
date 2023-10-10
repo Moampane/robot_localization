@@ -34,17 +34,19 @@ Fig 3. Figure of matrix multiplication process used to make odometry movement tr
 #### Update particles with robot's laser scan (`update_particles_with_laser()`)
 Testing each particle's location for similarity to the robot's location requires projecting the robot's laser scan data to each particle. To project the laser scan data onto each particle, each laser scan vector is added to each particle.
 
-ADD IMAGE OF LASER SCAN VECTOR BEING ADDED TO A PARTICLE
+![One laser scan point being projected on a particle](img/project_laser_scan.png)
+Fig 4. Figure of one laser scan point being projected onto one particle
 
 After laser scan data is projected onto a particle, using the helper function 'get_closest_obstacle_distance()' and passing in the x and y of a projected laser scan point as parameters, if a projected point is within 5cm of an obstacle, the particle the projection is coming off increases in weight. This is done for every projected laser scan point of every particle.
 
-ADD IMAGE OF 2 PARTICLE PROJECTION EXAMPLE
+![Robot laser scan and two laser scan projections](img/projections.png)
+Fig 5. Visualization of robot's laser scan and two laser scan projections. Red and blue dots are projected laser scan points from the corresponding red and blue arrows representing particles. The red particle has a higher weight because more of its projected laser scan points are within 5cm of an obstacle while none of the blue particle's projected laser scan points are within 5cm of an obstacle.
 
 #### Update robot position with particles' weights (`update_robot_pose()`)
 Using the weights of updated particles, the robot's new position can be estimated. In this project, a mode-based approach was used, where the mode of high-weight particles determined the robot's new location. The image below shows the updating process.
 
 ![Robot pose update](img/robot_pose_update.png)
-Fig 4. Visualization of mode-based robot pose updating
+Fig 6. Visualization of mode-based robot pose updating
 
 A particle is considered *high-weight* if its weight is greater than 0.01. Then, the particles' $(x,y,\theta)$ coordinates are rounded up to 2 decimal places for the purpose of calculating the mode. 
 
@@ -52,7 +54,7 @@ A particle is considered *high-weight* if its weight is greater than 0.01. Then,
 Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\sigma = (0.05,0.05)$ and $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. This keeps the highest weight particle in the cloud but replacess every other particle with a new set of 299 particles. The resampling process is shown in the figure below.
 
 ![Particle resampling](img/resampling.png)
-Fig 5. Visualization of the resampling process
+Fig 7. Visualization of the resampling process
 
 
 
