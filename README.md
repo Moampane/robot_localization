@@ -71,6 +71,8 @@ The biggest challenge we faced during this project was trying to fine-tune all t
 Another challenge was getting a solid foundation of the concepts behind particle filters before diving into the project. Since this topic was new to both of us, we spent a lot of time researching the topic before going into the project. There were confusing linear algebra concepts like reference frames and transformtaion matrices that made the project far more challenging than we expected. 
 
 ## Project Reflection
-We learned the importance of reading docstrings as well as comments.
+Compared to the previous project, this project was definetely more challenging due to the complex ideas behind particle filters. Since most ROS2 aspects like creating publishers/subscribers were already included in the starter code, there was enough time to fully explore the concepts used in implementing the particle filter. Some valuable lessons we leared include testing code in small pieces to verify it works before moving onto the next step, reading code documentation, and using new functions like `matmul`, `random.multivariate_normal`, and `random.exponential` from the NumPy library.
+
+*HOW WOULD WE IMPROVE THE PROJECT IF WE HAD MORE TIME*
 
 
