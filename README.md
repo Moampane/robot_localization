@@ -66,7 +66,9 @@ Fig 7. Visualization of the resampling process
 
 
 ## Challenges we faced
-LOREM IPSUM
+The biggest challenge we faced during this project was trying to fine-tune all the different parameters used for the particle filter. The number of particles, particle weights, threshold values for determining if a particle should be considered *high-weight*, etc. Since altering any one of these values drastically affect the outcome, we spent a lot of time tuning these paramters to get the best outcome. In fact, almost half of the given time for this project was used for parameter tuning.  
+
+Another challenge we faced was understanding all the helper functions that were given to us. Since a lot of the helper functions used libraries that were unfamiliar to us, it was difficult to know what each line was doing at first glance. We learned the importance of reading docstrings as well as comments.
 
 
 ## Project Reflection
