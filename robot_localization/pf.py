@@ -76,7 +76,7 @@ class ParticleFilter(Node):
         self.odom_frame = "odom"        # the name of the odometry coordinate frame
         self.scan_topic = "scan"        # the topic where we will get laser scans from 
 
-        self.n_particles = 500          # the number of particles to use
+        self.n_particles = 300          # the number of particles to use
 
 
         self.d_thresh = 0.1             # the amount of linear movement before performing an update
@@ -185,7 +185,7 @@ class ParticleFilter(Node):
         self.normalize_particles()
         # Isolate particles that are above a certain weight threshold
         filtered = []
-        weight_thresh = 0.007
+        weight_thresh = 0.005
         for particle in self.particle_cloud:
             if particle.w >= weight_thresh:
                 filtered.append(particle)
@@ -197,12 +197,10 @@ class ParticleFilter(Node):
             new_y = st.mean([particle.y for particle in filtered])
             new_t = st.mean([particle.theta for particle in filtered])
 
-            q = quaternion_from_euler(0,0,new_t)
-            self.robot_pose = Pose(position = Point(x=new_x,y=new_y,z=0.0),
-                                orientation=Quaternion(x=q[0],y=q[1],z=q[2],w=q[3]))
+            self.robot_pose = Particle(new_x,new_y,new_t).as_pose()
+
         else:
-            self.robot_pose = Pose()
-            print(f"{filtered}, robot sent to origin")
+            self.robot_pose = Particle(w=0.0).as_pose()
         if hasattr(self, 'odom_pose'):
             self.transform_helper.fix_map_to_odom_transform(self.robot_pose,
                                                             self.odom_pose)
@@ -249,33 +247,26 @@ class ParticleFilter(Node):
             particle.theta += math.atan2(trans_mat[1][0], trans_mat[0][0])
                  
 
-    def resample_particles(self): # TUNING NEEDED
+    def resample_particles(self):
         """ Resample the particles according to the new particle weights.
             The weights stored with each particle should define the probability that a particular
             particle is selected in the resampling step.  You may want to make use of the given helper
             function draw_random_sample in helper_functions.py.
         """
-        # TOP `n` PARTICLES
-        n = 3
-        sorted_particles = sorted(self.particle_cloud, key=lambda particle: particle.w, reverse=True)[:n]
-        print([p.w for p in sorted_particles])
-        # Reset particle cloud
-        self.particle_cloud = []
-        for particle in sorted_particles:
-            xc,yc = particle.x,particle.y
-            mu = [xc,yc]
-            sigma = 0.15
-            x_coords,y_coords = np.random.multivariate_normal(mu, [[sigma,0],[0,sigma]], (self.n_particles-n)//n).T
+        sum = 0
+        for p in self.particle_cloud:
+            sum += p.w
+        print(f"weight sum: {sum}")
+        resampled = draw_random_sample(self.particle_cloud,[particle.w for particle in self.particle_cloud], self.n_particles)
 
-            # Add exponential noise to angle
-            angle_noise = np.random.exponential(40,self.n_particles-1)
-            angle_with_noise = [np.deg2rad(particle.theta + noise) for noise in angle_noise]
-            
-            for i in range((self.n_particles-n)//n):
-                x = x_coords[i]
-                y = y_coords[i]
-                theta = angle_with_noise[i]
-                self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
+        # Gaussian Noise
+        for particle in resampled:
+            particle.x = np.random.normal(loc=particle.x, scale=0.05)
+            particle.y = np.random.normal(loc=particle.y, scale=0.05)
+            particle.theta = np.random.normal(loc=particle.theta, scale=0.1)
+            particle.w = 0.0
+        self.particle_cloud = resampled
+
 
 
     def update_particles_with_laser(self, r, theta):
@@ -298,7 +289,7 @@ class ParticleFilter(Node):
                 else:
                     dist_from_obstacle = self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y)
                     if dist_from_obstacle < laser_dist_thresh:
-                        weight = abs(laser_dist_thresh - dist_from_obstacle) / laser_dist_thresh
+                        weight = (laser_dist_thresh - dist_from_obstacle) / laser_dist_thresh
                         weight_sum += weight
             particle.w = weight_sum
     
@@ -321,13 +312,14 @@ class ParticleFilter(Node):
         # Use 2D gaussian to initialize particles 
         xc,yc = xy_theta[0],xy_theta[1]
         mu = [xc,yc]
-        sigma = 0.15
+        sigma = 0.1
         x_coords,y_coords = np.random.multivariate_normal(mu, [[sigma,0],[0,sigma]], self.n_particles).T
         for i in range(self.n_particles):
             x = x_coords[i]
             y = y_coords[i]
-            theta = np.deg2rad(np.random.uniform(low=0,high=359,size=(1))[0])
-            self.particle_cloud.append(Particle(x=x,y=y,theta=theta,w=1.0))
+            theta = np.random.normal(xy_theta[2],0.2)
+            self.particle_cloud.append(Particle(x=x,y=y,theta=theta))
+
 
         self.normalize_particles()
         self.update_robot_pose()
