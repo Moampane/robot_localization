@@ -66,12 +66,14 @@ Fig 7. Visualization of the resampling process
 
 
 ## Challenges we faced
-The biggest challenge we faced during this project was trying to fine-tune all the different parameters used for the particle filter. The number of particles, particle weights, threshold values for determining if a particle should be considered *high-weight*, etc. Since altering any one of these values drastically affect the outcome, we spent a lot of time tuning these paramters to get the best outcome. In fact, almost half of the given time for this project was used for parameter tuning.
+The biggest challenge we faced during this project was trying to fine-tune all the different parameters used for the particle filter. The number of particles, particle weights, threshold values for determining if a particle should be considered *high-weight*, etc. Since altering any one of these values drastically affects the outcome, we spent a lot of time tuning these paramters to get the best outcome. In fact, almost half of the given time for this project was used for parameter tuning.
+
+Additionally, implementing 'update_particles_with_odom()' using matrix multiplication was a challenge. Understanding the shift from the odometry frame to an individual particle frame took some time.
 
 Another challenge was getting a solid foundation of the concepts behind particle filters before diving into the project. Since this topic was new to both of us, we spent a lot of time researching the topic before going into the project. There were confusing linear algebra concepts like reference frames and transformtaion matrices that made the project far more challenging than we expected. 
 
 ## Project Reflection
-Compared to the previous project, this project was definetely more challenging due to the complex ideas behind particle filters. Since most ROS2 aspects like creating publishers/subscribers were already included in the starter code, there was enough time to fully explore the concepts used in implementing the particle filter. Some valuable lessons we leared include testing code in small pieces to verify it works before moving onto the next step, reading code documentation, and using new functions like `matmul`, `random.multivariate_normal`, and `random.exponential` from the NumPy library.
+Compared to the previous project, this project was definetely more challenging due to the complex ideas behind particle filters. Since most ROS2 aspects like creating publishers/subscribers were already included in the starter code, there was enough time to fully explore the concepts used in implementing the particle filter. Some valuable lessons we learned include testing code in small pieces to verify it works before moving onto the next step, reading code documentation, and using new functions like `matmul`, `random.multivariate_normal`, and `random.exponential` from the NumPy library.
 
 *HOW WOULD WE IMPROVE THE PROJECT IF WE HAD MORE TIME*
 
