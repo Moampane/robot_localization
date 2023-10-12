@@ -293,10 +293,13 @@ class ParticleFilter(Node):
                 phi = particle.theta
                 proj_laserscan_x = particle.x+r[i]*np.cos(phi + theta[i])
                 proj_laserscan_y = particle.y+r[i]*np.sin(phi + theta[i])
-                dist_from_obstacle = self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y)
-                if dist_from_obstacle < laser_dist_thresh:
-                    weight = abs(laser_dist_thresh - dist_from_obstacle) / laser_dist_thresh
-                    weight_sum += weight
+                if proj_laserscan_x in [float('-inf'), float('inf')] or proj_laserscan_y in [float('-inf'), float('inf')]:
+                    pass
+                else:
+                    dist_from_obstacle = self.occupancy_field.get_closest_obstacle_distance(proj_laserscan_x, proj_laserscan_y)
+                    if dist_from_obstacle < laser_dist_thresh:
+                        weight = abs(laser_dist_thresh - dist_from_obstacle) / laser_dist_thresh
+                        weight_sum += weight
             particle.w = weight_sum
     
 
