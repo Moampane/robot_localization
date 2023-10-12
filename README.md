@@ -18,7 +18,7 @@ Before running the particle filter, an initial set of particles must be created.
 ![Particle cloud plot](img/particle_cloud.png)  
 Fig 1. Visualization of the probability distribution used for initializing the particle cloud
 
-$(x,y)$ coordinates of 300 initial particles are selected using this probability distribution. The particles' angles are randomly selected from a range of $0$ to $2\pi$ radians.
+$(x,y)$ coordinates of 500 initial particles are selected using this probability distribution. The particles' angles are randomly selected from a range of $0$ to $2\pi$ radians.
 
 #### Update particles with robot's odomoetry (`update_particles_with_odom()`)
 Once a set of particles is initialized, all of the robot's movements, recorded by the odometry, must be applied to each particle. This is relevant to the weighting of each particle.
@@ -57,12 +57,14 @@ Fig 6. Visualization of mean-based robot pose updating
 A particle is considered *high-weight* if its weight is greater than 0.007.
 
 #### Resample particles (`resample_particles()`)
-Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. For resampling the particles, the same 2D gaussian distribution used in `initialize_particle_cloud()` is used, but $\sigma = (0.05,0.05)$ and $\mu$ is the $(x,y)$ coordinates of the highest-weight particle. This keeps the highest weight particle in the cloud but replacess every other particle with a new set of 299 particles. The resampling process is shown in the figure below.
-
+Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. First, the particle cloud is sorted by weight in descending order. Then, the top 3 particles are selected for the resampling process. For each selected particle, a 2D gaussian distribution of $\sigma = (\sigma _x,\sigma _y)$ and $\mu = (x_{particle},y_{particle})$ is used to generate particles around it. 
 ![Particle resampling](img/resampling.png)
 Fig 7. Visualization of the resampling process
 
+For the angle of the resampled particle, an exponential noise is added to the high-weight particle's angle to have most particles face in a similar direction but still have some particles facing in different directions. The noise distribution is shown below.  
 
+![Angular noise](img/angle_noise.png)  
+Fig 8. Distribution used to add angular noise in particles
 
 
 ## Challenges we faced
@@ -75,6 +77,5 @@ Another challenge was getting a solid foundation of the concepts behind particle
 ## Project Reflection
 Compared to the previous project, this project was definetely more challenging due to the complex ideas behind particle filters. Since most ROS2 aspects like creating publishers/subscribers were already included in the starter code, there was enough time to fully explore the concepts used in implementing the particle filter. Some valuable lessons we learned include testing code in small pieces to verify it works before moving onto the next step, reading code documentation, and using new functions like `matmul`, `random.multivariate_normal`, and `random.exponential` from the NumPy library.
 
-*HOW WOULD WE IMPROVE THE PROJECT IF WE HAD MORE TIME*
 
 
