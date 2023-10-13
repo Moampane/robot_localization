@@ -57,11 +57,12 @@ Fig 6. Visualization of mean-based robot pose updating
 A particle is considered *high-weight* if its weight is greater than 0.007.
 
 #### Resample particles (`resample_particles()`)
-Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. First, the particle cloud is sorted by weight in descending order. Then, the top 3 particles are selected for the resampling process. For each selected particle, a 2D gaussian distribution of $\sigma = (\sigma _x,\sigma _y)$ and $\mu = (x_{particle},y_{particle})$ is used to generate particles around it. 
+NEED TO BE UPDATED
+<!-- Once the robot's position is updated, a new set of particles need to be sampled to repeat the process. First, the particle cloud is sorted by weight in descending order. Then, the top 3 particles are selected for the resampling process. For each selected particle, a 2D gaussian distribution of $\sigma = (\sigma _x,\sigma _y)$ and $\mu = (x_{particle},y_{particle})$ is used to generate particles around it. 
 ![Particle resampling](img/resampling.png)
-Fig 7. Visualization of the resampling process
+Fig 7. Visualization of the resampling process -->
 
-For the angle of the resampled particle, an exponential noise is added to the high-weight particle's angle to have most particles face in a similar direction but still have some particles facing in different directions. The noise distribution is shown below.  
+For the angle of the resampled particle, an gaussian distribution centered on the each particle's angle to have the new particle face in a similar direction but have a possibility of facing in a different direction. 
 
 ![Angular noise](img/angle_noise.png)  
 Fig 8. Distribution used to add angular noise in particles
