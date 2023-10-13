@@ -46,8 +46,6 @@ class Particle(object):
         return Pose(position=Point(x=self.x, y=self.y, z=0.0),
                     orientation=Quaternion(x=q[0], y=q[1], z=q[2], w=q[3]))
 
-    # TODO: define additional helper functions if needed
-
 class ParticleFilter(Node):
     """ The class that represents a Particle Filter ROS Node
         Attributes list:
@@ -147,13 +145,13 @@ class ParticleFilter(Node):
             return
         
         (r, theta) = self.transform_helper.convert_scan_to_polar_in_robot_frame(msg, self.base_frame)
-        #print("r[0]={0}, theta[0]={1}".format(r[0], theta[0]))
+
         # clear the current scan so that we can process the next one
         self.scan_to_process = None
 
         self.odom_pose = new_pose
         new_odom_xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(self.odom_pose)
-        # print("x: {0}, y: {1}, yaw: {2}".format(*new_odom_xy_theta))
+
         if not self.current_odom_xy_theta:
             self.current_odom_xy_theta = new_odom_xy_theta
         elif not self.particle_cloud:
@@ -176,7 +174,7 @@ class ParticleFilter(Node):
                math.fabs(new_odom_xy_theta[2] - self.current_odom_xy_theta[2]) > self.a_thresh
 
 
-    def update_robot_pose(self): # TUNING NEEDED
+    def update_robot_pose(self): 
         """ Update the estimate of the robot's pose given the updated particles.
             There are two logical methods for this:
                 (1): compute the mean pose
@@ -207,7 +205,7 @@ class ParticleFilter(Node):
         else:
             self.get_logger().warn("Can't set map->odom transform since no odom data received")
 
-    def update_particles_with_odom(self): # WORKS
+    def update_particles_with_odom(self):
         """ Update the particles using the newly given odometry pose.
             The function computes the value delta which is a tuple (x,y,theta)
             that indicates the change in position and angle between the odometry
@@ -223,6 +221,7 @@ class ParticleFilter(Node):
             self.current_odom_xy_theta = new_odom_xy_theta
             return
 
+        # make trasformation matrices for updating particles
         old_odom_trans = np.array([[np.cos(old_odom_xy_theta[2]),-1*np.sin(old_odom_xy_theta[2]),old_odom_xy_theta[0]],
                               [np.sin(old_odom_xy_theta[2]),np.cos(old_odom_xy_theta[2]),old_odom_xy_theta[1]],
                               [0,0,1]])
@@ -232,9 +231,11 @@ class ParticleFilter(Node):
         trans_mat = np.linalg.inv(old_odom_trans) @ new_odom_trans
 
         for particle in self.particle_cloud:
+            # make transformation matrix to apply odometry in particle frame
             particle_trans = np.array([[np.cos(particle.theta),-1*np.sin(particle.theta),particle.x],
                               [np.sin(particle.theta),np.cos(particle.theta),particle.y],
                               [0,0,1]])
+            
             updated_particle_trans = particle_trans @ trans_mat @ np.linalg.inv(particle_trans)
 
             coord = np.array([particle.x,
@@ -300,7 +301,7 @@ class ParticleFilter(Node):
         xy_theta = self.transform_helper.convert_pose_to_xy_and_theta(msg.pose.pose)
         self.initialize_particle_cloud(msg.header.stamp, xy_theta)
 
-    def initialize_particle_cloud(self, timestamp, xy_theta=None): # WORKS
+    def initialize_particle_cloud(self, timestamp, xy_theta=None): 
         """ Initialize the particle cloud.
             Arguments
             xy_theta: a triple consisting of the mean x, y, and theta (yaw) to initialize the
